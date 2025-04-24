@@ -1,13 +1,16 @@
 import { useState } from "react";
 
 export default function UserList() {
-  const [users] = useState(["Alice", "Bob", "Charlie"]);
+  const [users, setUsers] = useState(["Alice", "Bob", "Charlie"]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const showDetail = selectedUser !== null ? true : false;
+  const showDetails = selectedUser !== null;
 
-  const filteredUsers = users.filter((user) => user === searchTerm);
+  const filteredUsers = users.filter((user) => {
+    const value = searchTerm.toLowerCase();
+    return user.toLowerCase().includes(value);
+  });
 
   const handleHover = (user) => {
     setTimeout(() => {
@@ -15,17 +18,26 @@ export default function UserList() {
     }, 1000);
   };
 
+  const handleDelete = (index) => {
+    setUsers((prevUser) => prevUser.filter((_, i) => i !== index));
+  };
+
   return (
-    <div className="mt-4">
+    <div className="mt-4 items-center text-center">
       <h2 className="text-xl font-bold">Users</h2>
 
-      <input type="text" value={searchTerm} className="border p-2 mt-2" />
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="border p-2 mt-2"
+      />
 
-      <ul>
+      <ul className="flex items-center gap-3 my-10">
         {(filteredUsers.length > 0 ? filteredUsers : users).map(
           (user, index) => (
             <li
-              key={index + Math.random()}
+              key={`${user}-${index}`}
               onClick={() => {
                 setSelectedUser(user);
               }}
@@ -36,9 +48,7 @@ export default function UserList() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  const newUsers = [...users];
-                  newUsers.splice(index, 1);
-                  setUsers(newUsers);
+                  handleDelete(index);
                 }}
                 className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
               >
